@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPG to URL Converter - Fal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+            min-height: 100vh;
+            padding: 60px 20px;
+            color: #ffffff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            color: #888888;
+            font-size: 1.1em;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .info-box p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #b0b0b0;
+            line-height: 1.7;
+        }
+
+        .info-box strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(99, 102, 241, 0.5);
+            border-radius: 16px;
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(20, 20, 20, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: rgba(99, 102, 241, 0.8);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            font-size: 0.9em;
+            color: #888888;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 18px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-upload:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-upload:disabled {
+            background: rgba(100, 100, 100, 0.3);
+            box-shadow: none;
+            cursor: not-allowed;
+            color: #666666;
+        }
+
+        .btn-clear {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .preview-section {
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .preview-info {
+            padding: 12px;
+            font-size: 12px;
+            color: #888888;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ef4444;
+            transform: scale(1.1);
+        }
+
+        .progress-section {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .progress-item {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-filename {
+            font-size: 13px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .progress-status {
+            font-size: 12px;
+            color: #888888;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+
+        .results-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-success {
+            color: #10b981;
+        }
+
+        .stat-error {
+            color: #ef4444;
+        }
+
+        .stat-label {
+            color: #888888;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-item {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-item.success {
+            border-left: 3px solid #10b981;
+        }
+
+        .result-item.error {
+            border-left: 3px solid #ef4444;
+        }
+
+        .result-preview {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .result-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-filename {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-url-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .result-url {
+            flex: 1;
+            font-size: 13px;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-copy {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-copy.copied {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 30px 15px;
+            }
+
+            h1 {
+                font-size: 2.5em;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .result-preview {
+                flex-direction: column;
+            }
+
+            .result-image {
+                width: 100%;
+                height: 200px;
+            }
+
+            .result-url-container {
+                flex-direction: column;
+            }
+
+            .btn-copy {
+                width: 100%;
+            }
+        }
+
+        ::selection {
+            background: rgba(99, 102, 241, 0.3);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JPG to URL</h1>
+            <p class="subtitle">Upload images and get shareable URLs instantly</p>
+        </header>
+
+        <div class="info-box">
+            <p><strong>How it works</strong></p>
+            <p>Upload JPG/PNG images → Get permanent URLs → Copy & share anywhere</p>
+            <p><strong>Features:</strong> Drag & drop, batch upload, custom folders (NINE_STUDIO), powered by Cloudinary</p>
+        </div>
+
+        <div class="card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">Click or Drag & Drop Images Here</div>
+                <div class="upload-hint">Support: JPG, PNG, GIF (Max 10MB per file)</div>
+            </div>
+            <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/gif,image/webp">
+
+            <div class="preview-section" id="previewSection">
+                <h3 style="margin-bottom: 15px; color: #ffffff;">Selected Images</h3>
+                <div class="preview-grid" id="previewGrid"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-upload" id="uploadBtn" disabled>Upload All</button>
+                <button class="btn-clear" id="clearBtn">Clear</button>
+            </div>
+        </div>
+
+        <div class="progress-section" id="progressSection">
+            <h3 style="margin-bottom: 20px; color: #ffffff;">Uploading...</h3>
+            <div id="progressContainer"></div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title">Results</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div>
+                            <div class="stat-number stat-success" id="successCount">0</div>
+                            <div class="stat-label">Success</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div>
+                            <div class="stat-number stat-error" id="errorCount">0</div>
+                            <div class="stat-label">Failed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const previewSection = document.getElementById('previewSection');
+        const previewGrid = document.getElementById('previewGrid');
+        const progressSection = document.getElementById('progressSection');
+        const progressContainer = document.getElementById('progressContainer');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        let selectedFiles = [];
+        let uploadResults = [];
+
+        // Cloudinary Configuration
+        const CLOUDINARY_CLOUD_NAME = 'damrm9wug';
+        const CLOUDINARY_API_KEY = '992995246151189';
+        const CLOUDINARY_API_SECRET = 'rICGqHO28fZHXUKoHoG2f8e3GOo';
+        const CLOUDINARY_UPLOAD_PRESET = 'ml_default'; // unsigned preset
+        const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag & drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            handleFiles(files);
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            // Validate files
+            const validFiles = files.filter(file => {
+                if (!file.type.startsWith('image/')) {
+                    alert(`${file.name} is not an image file`);
+                    return false;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`${file.name} is too large (max 10MB)`);
+                    return false;
+                }
+                return true;
+            });
+
+            selectedFiles = [...selectedFiles, ...validFiles];
+            displayPreviews();
+            uploadBtn.disabled = selectedFiles.length === 0;
+        }
+
+        function displayPreviews() {
+            previewGrid.innerHTML = '';
+            previewSection.style.display = selectedFiles.length > 0 ? 'block' : 'none';
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <div class="preview-info">${file.name} (${(file.size / 1024).toFixed(1)} KB)</div>
+                        <button class="remove-btn" onclick="removeFile(${index})">×</button>
+                    `;
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Auto-scroll to preview section after files are added
+            if (selectedFiles.length > 0) {
+                setTimeout(() => {
+                    previewSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }, 100);
+            }
+        }
+
+        window.removeFile = function(index) {
+            selectedFiles.splice(index, 1);
+            displayPreviews();
+            uploadBtn.disabled = selectedFiles.length === 0;
+        }
+
+        // Upload files
+        uploadBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            uploadBtn.disabled = true;
+            progressSection.style.display = 'block';
+            progressContainer.innerHTML = '';
+            uploadResults = [];
+
+            // Scroll to progress section immediately
+            setTimeout(() => {
+                progressSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                await uploadFile(file, i);
+                
+                // Auto-scroll after each file to show progress
+                setTimeout(() => {
+                    const progressItem = document.getElementById(`progress-${i}`);
+                    if (progressItem) {
+                        progressItem.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                }, 100);
+            }
+
+            displayResults();
+            uploadBtn.disabled = false;
+        });
+
+        async function uploadFile(file, index) {
+            const progressItem = document.createElement('div');
+            progressItem.className = 'progress-item';
+            progressItem.id = `progress-${index}`;
+            progressItem.innerHTML = `
+                <div class="progress-header">
+                    <span class="progress-filename">${file.name}</span>
+                    <span class="progress-status" id="status-${index}">Uploading...</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="bar-${index}"></div>
+                </div>
+            `;
+            progressContainer.appendChild(progressItem);
+
+            const bar = document.getElementById(`bar-${index}`);
+            const status = document.getElementById(`status-${index}`);
+
+            try {
+                // Simulate progress
+                bar.style.width = '30%';
+
+                // Convert to base64
+                const base64 = await fileToBase64(file);
+                bar.style.width = '50%';
+
+                // Generate timestamp and signature for Cloudinary
+                const timestamp = Math.floor(Date.now() / 1000);
+                
+                // Extract filename without extension for public_id
+                const originalName = file.name.replace(/\.[^/.]+$/, "");
+                const cleanName = originalName.replace(/[^a-zA-Z0-9-_]/g, '-');
+                
+                // Create folder structure (you can customize this)
+                const folder = 'NINE_STUDIO'; // Default folder
+                const publicId = `${folder}/${cleanName}`;
+
+                // Create signature (simplified for client-side)
+                const paramsToSign = `folder=${folder}&public_id=${cleanName}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
+                
+                // Upload to Cloudinary
+                const formData = new FormData();
+                formData.append('file', base64);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                formData.append('api_key', CLOUDINARY_API_KEY);
+                formData.append('timestamp', timestamp);
+                formData.append('folder', folder);
+                formData.append('public_id', cleanName);
+
+                console.log(`Uploading ${file.name} to Cloudinary...`);
+
+                const response = await fetch(CLOUDINARY_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                bar.style.width = '80%';
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Upload failed');
+                }
+
+                console.log(`Upload success: ${file.name}`, data);
+
+                bar.style.width = '100%';
+                bar.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
+                status.textContent = '✓ Success';
+                status.style.color = '#10b981';
+
+                uploadResults.push({
+                    success: true,
+                    filename: file.name,
+                    url: data.secure_url,
+                    publicId: data.public_id,
+                    thumbnail: data.secure_url,
+                    size: file.size
+                });
+
+            } catch (error) {
+                console.error(`Upload failed: ${file.name}`, error);
+                
+                bar.style.width = '100%';
+                bar.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+                status.textContent = '✗ Failed';
+                status.style.color = '#ef4444';
+
+                uploadResults.push({
+                    success: false,
+                    filename: file.name,
+                    error: error.message || 'Unknown error'
+                });
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayResults() {
+            resultsSection.style.display = 'block';
+            resultsContainer.innerHTML = '';
+
+            const successCount = uploadResults.filter(r => r.success).length;
+            const errorCount = uploadResults.filter(r => !r.success).length;
+
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('errorCount').textContent = errorCount;
+
+            uploadResults.forEach((result, index) => {
+                const div = document.createElement('div');
+                div.className = result.success ? 'result-item success' : 'result-item error';
+
+                if (result.success) {
+                    div.innerHTML = `
+                        <div class="result-preview">
+                            <img src="${result.thumbnail}" alt="${result.filename}" class="result-image">
+                            <div class="result-info">
+                                <div class="result-filename">${result.filename}</div>
+                                <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                                    Size: ${(result.size / 1024).toFixed(1)} KB
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-url-container">
+                            <div class="result-url" id="url-${index}">${result.url}</div>
+                            <button class="btn-copy" onclick="copyUrl(${index}, '${result.url}')">Copy</button>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="result-filename">${result.filename}</div>
+                        <div class="error-message">Upload failed: ${result.error}</div>
+                    `;
+                }
+
+                resultsContainer.appendChild(div);
+            });
+
+            // Smooth scroll to results section
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 500);
+        }
+
+        window.copyUrl = function(index, url) {
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied';
+                btn.classList.add('copied');
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            uploadResults = [];
+            fileInput.value = '';
+            previewGrid.innerHTML = '';
+            previewSection.style.display = 'none';
+            progressSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+            uploadBtn.disabled = true;
+        });
+
+        console.log('%c✨ JPG to URL Converter Ready', 'font-size: 16px; color: #6366f1; font-weight: bold;');
+        console.log('%cUpload images and get instant URLs! (Powered by Cloudinary)', 'color: #888;');
+    </script>
+</body>
+</html>
